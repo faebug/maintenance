@@ -38,7 +38,7 @@ userpages = [
 myhost = platform.node()
 if myhost == 'raspberrypi':
 	myhost = ' ({})'.format(myhost)
-elif myhost == 'ashley-ThinkPad-X220':
+elif re.search('X220', myhost):
 	myhost = ' (ThinkPad-X220)'
 elif myhost[:5] == 'tools':
 	myhost = ' ([[Toolforge:|Toolforge]])'
