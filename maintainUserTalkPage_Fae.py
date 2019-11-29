@@ -17,8 +17,7 @@ Author: Fae, http://j.mp/faewm
 Permissions: CC-BY-SA-NC
 '''
 
-import pywikibot, sys, urllib2, urllib, re, time
-import platform
+import pywikibot, re, platform
 
 userpages = [
 		u"F\xe6",
