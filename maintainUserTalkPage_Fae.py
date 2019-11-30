@@ -27,8 +27,6 @@ userpages = [
 		"Reguyla",
 		"Rcbutcher",
 		"Wuestenigel",
-		"Panoramio upload bot", # Request by Steinsplitter
-		"GifTagger", # Requested by Jeff G.
 		"Artix Kreiger", # Global lock, lots of notices
 		"~riley", # https://commons.wikimedia.org/w/index.php?diff=377380291
 		]
@@ -137,7 +135,7 @@ for page in userpages:
 	# Speedywhat
 	regex = "\n(\{\{[aA]utotranslate\|1=File:([^\|]*?)\|base=speedywhat[^\|\}]*\}\})"
 	if re.search(regex, html):
-		html = re.sub(regex, r"\n{{green|<small>{{tlx|Speedywhat}} notice removed. Deleting admin please note, if you want anything to be learned from your decision to delete, using the standard [[Commons:Deletion requests|]] procedure gives several days for non-sysops to examine the history and details of the files to be deleted. Skipping this collegiate step, means that despite investing effort into deleting specific files, you are unlikely to see any related improvements to the way upload projects work. -- Faebot</small>}}\n<!--Boiler plate notice reduced: \1-->\n\n{{lf|\2}}", html)
+		html = re.sub(regex, r"\n{{green|<small>{{tlx|Speedywhat}} notice removed.</small>}}\n<!--Boiler plate notice reduced: \1-->\n\n{{lf|\2}}", html)
 		go = True
 		action.append("Trim speedywhat notice")
 	
