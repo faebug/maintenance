@@ -17,7 +17,9 @@ Author: Fae, http://j.mp/faewm
 Permissions: CC-BY-SA-NC
 '''
 
-import pywikibot, re, platform
+import pywikibot, sys, urllib2, urllib, re, time
+import platform, os.path
+from random import randint
 
 userpages = [
 		u"F\xe6",
@@ -27,15 +29,16 @@ userpages = [
 		"Reguyla",
 		"Rcbutcher",
 		"Wuestenigel",
-		"Artix Kreiger", # Global lock, lots of notices
-		"~riley", # https://commons.wikimedia.org/w/index.php?diff=377380291
 		]
 
 # Add physical machine to edit comment
 myhost = platform.node()
 if myhost == 'raspberrypi':
+	if os.path.isfile('/sys/firmware/devicetree/base/model'):
+		if re.search('Pi Zero', open('/sys/firmware/devicetree/base/model', 'r').read() ):
+			myhost = 'Pi Zero'
 	myhost = ' ({})'.format(myhost)
-elif re.search('X220', myhost):
+elif myhost == 'ashley-ThinkPad-X220':
 	myhost = ' (ThinkPad-X220)'
 elif myhost[:5] == 'tools':
 	myhost = ' ([[Toolforge:|Toolforge]])'
@@ -43,6 +46,17 @@ else:
 	myhost = ''
 
 site = pywikibot.getSite('commons', 'commons')
+
+# Add banned users, 1% of the time
+if randint(1,100) == 1:
+	banned = [u.title()[5:] for u in pywikibot.Category(site, "Category:Commons users banned by the WMF").articles() if u.title()[5:] not in userpages]
+	userpages.extend( banned )
+
+# Add over-transcluded list as of 2019 after notifications, 5% of the time
+if randint(1,20) == 1:
+	transcluded = u"Grzesiek Kurka,Inefable001,Olaf Kosinsky (usurped),Germrai,Posterrr,Mti,Keres 40,Daniel Ventura,Dabit100,Star61,Talmoryair,Luissilveira,CoughingCookieHeart,Huthayfah Halabiyeh,Ser Amantio di Nicolao,Константин Филиппов,Vladimir OKC,Garitan,BugWarp,Bergamasco70,S. DÉNIEL,Shahen Araboghlian,Khangul,BezPRUzyn,Avril1975,Noniki,Tatiana Matlina,Jcpag2012,Xpotty,Ввласенко,Daising Shiumia MA,Daniel V.,Zarateman,WDKeeper,Tigran Mitr am,SreeBot".split(',')
+	transcluded.append(u'Mindmatrix (2019, part I)')
+	userpages.extend( transcluded )
 
 for page in userpages:
 	mypage = pywikibot.Page(site, 'User talk:' + page)
@@ -156,4 +170,7 @@ for page in userpages:
 	if go:
 			action = " | ".join(action) + myhost
 			pywikibot.setAction(action)
-			mypage.put(html)
+			try:
+				mypage.put(html)
+			except Exception:
+				pass
