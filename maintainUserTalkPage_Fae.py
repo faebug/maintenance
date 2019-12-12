@@ -4,7 +4,7 @@
 maintainUserTalkPage_Fae.py
 https://commons.wikimedia.org/wiki/User_talk:Fae/talk_page_trimmer
 
-Trim the most ghastly of templates from user talk to something more palattable
+Trim the most ghastly of templates from user talk to something more palatable
 Intended to run hourly or less in local crontab, later pushed out to ToolForge.
 
 Date: July 2014, Dec 2014, Feb 2015
@@ -13,7 +13,10 @@ Date: July 2014, Dec 2014, Feb 2015
 	2019 November Version to run on Ubuntu, running with Faebot, add riley
 		 Add over transcluded and WMF banned accounts
 	2019 December
-		 Add ALL parameter to include all listed pages
+		 ALL parameter to include all listed pages
+		 Long term locally blocked accounts with 20,000+ edits
+		 [[Category:Talk page trimmer]] for self inclusion
+		 Last touched check to reduce processing of old pages
 
 Example crontab
 13,28,43,57 * * * * cd '/home/pi/pywikibot/core'; nice -n 20 python pwb.py maintainUserTalkPage_Fae.py -dir:faebot 1>/dev/null 2>&1
@@ -26,8 +29,8 @@ Author: Fae, http://j.mp/faewm
 Permissions: CC-BY-SA-NC
 '''
 
-import pywikibot, sys, urllib2, urllib, re, time
-import platform, os.path
+import pywikibot, sys, urllib2, urllib, re
+import platform, os.path, datetime
 from random import randint
 
 userpages = [
@@ -81,22 +84,46 @@ if override or randint(1,10) == 1:
 
 # Active! Add banned users, 1% of the time
 if override or randint(1,100) == 1:
-	banned = [u.title()[5:] for u in pywikibot.Category(site, "Category:Commons users banned by the WMF").articles() if u.title()[5:] not in userpages]
+	wmfban = pywikibot.Category(site, "Category:Commons users banned by the WMF").articles()
+	banned = [u.title()[5:] for u in wmfban if u.namespace().id==2 and u.title()[5:] not in userpages]
 	userpages.extend( banned )
+
 # Long term blocked users, 5% of the time
 if override or randint(1,20) == 1:
-	blocked = u"Juiced lemon,Worldenc,Lycaon,Massimilianogalardi,MakBot,MaybeMaybeMaybe,Saibo,Unauthorized Bot,FA2010,Scotire,Erwin Lindemann,Steinbeisser~commonswiki,FSV,Orrling,EChastain,Soranoch,Hiku2,Blackwhiteupl,苏州河,Co9man,Look2See1,Kharkivinite,OSX II,FlickrWarrior,Dr. Bernd Gross,Amitie 10g,TohaomgBot,BulbaBot,GH1903892AH".split(',')
+	blocked = u"Juiced lemon,Worldenc,Lycaon,Massimilianogalardi,MakBot,\
+MaybeMaybeMaybe,Saibo,Unauthorized Bot,FA2010,Scotire,Erwin Lindemann,\
+Steinbeisser~commonswiki,FSV,Orrling,EChastain,Soranoch,Hiku2,Blackwhiteupl,\
+苏州河,Co9man,Look2See1,Kharkivinite,OSX II,FlickrWarrior,Dr. Bernd Gross,\
+Amitie 10g,TohaomgBot,BulbaBot,GH1903892AH".split(',')
 	userpages.extend( blocked )
 
 # Add over-transcluded list as of 2019 after notifications, 5% of the time
 if override or randint(1,20) == 1:
-	transcluded = u"Grzesiek Kurka,Inefable001,Olaf Kosinsky (usurped),Germrai,Posterrr,Mti,Keres 40,Daniel Ventura,Dabit100,Star61,Talmoryair,Luissilveira,CoughingCookieHeart,Huthayfah Halabiyeh,Ser Amantio di Nicolao,Константин Филиппов,Vladimir OKC,Garitan,BugWarp,Bergamasco70,S. DÉNIEL,Shahen Araboghlian,Khangul,BezPRUzyn,Avril1975,Noniki,Tatiana Matlina,Jcpag2012,Xpotty,Ввласенко,Daising Shiumia MA,Daniel V.,Zarateman,WDKeeper,Tigran Mitr am,SreeBot".split(',')
-	transcluded.append(u'Mindmatrix (2019, part I)') # arg, accounts with commas
+	transcluded = u"Grzesiek Kurka,Inefable001,Olaf Kosinsky (usurped),Germrai,\
+Posterrr,Mti,Keres 40,Daniel Ventura,Dabit100,Star61,Talmoryair,Luissilveira,\
+CoughingCookieHeart,Huthayfah Halabiyeh,Ser Amantio di Nicolao,\
+Константин Филиппов,Vladimir OKC,Garitan,BugWarp,Bergamasco70,S. DÉNIEL,\
+Shahen Araboghlian,Khangul,BezPRUzyn,Avril1975,Noniki,Tatiana Matlina,Jcpag2012,\
+Xpotty,Ввласенко,Daising Shiumia MA,Daniel V.,Zarateman,WDKeeper,Tigran Mitr am,\
+SreeBot".split(',')
+	transcluded.append(u'Mindmatrix (2019, part I)') # account with comma!
 	userpages.extend( transcluded )
 
 for page in userpages:
-	mypage = pywikibot.Page(site, 'User talk:' + page)
-	html = mypage.get()
+	mypage = pywikibot.Page(site, u'User talk:' + page)
+	# Avoid processing contents for pages not touched in last 3 days
+	try:
+		lasttouched = (datetime.datetime.now() - [u for u in mypage.revisions(total=1)][0].timestamp).days
+		if lasttouched >= 3 and randint(1,1000)>1: # 1/1000th times, do it anyway
+			continue
+	except Exception as e:
+		print "Error when getting timestamp for", mypage.title()
+		print str(e)
+		continue
+	try:
+		html = mypage.get()
+	except:
+		continue
 	action = ["[[User talk:Fae/talk page trimmer|Trim templates]]"]
 	go=False
 	
@@ -201,7 +228,7 @@ for page in userpages:
 		go = True
 		action.append("Trim [[template:Speedywhat]] notice")
 
-	'''-- Tips and other non-warnings --'''
+	#-- Tips and other non-warnings --
 	
 	# Please link images
 	regex = "\n== \{\{Autotranslate\|base=Please link images/heading\}\} ==\n\n\{\{Autotranslate\|1=\|base=Please link images\}\}.*?\(UTC\)"
