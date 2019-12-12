@@ -53,7 +53,7 @@ if myhost == 'raspberrypi':
 		if re.search('Pi 3 Model B', open('/sys/firmware/devicetree/base/model', 'r').read() ):
 			myhost = 'Pi 3'
 	myhost = ' ({})'.format(myhost)
-elif myhost == 'ashley-ThinkPad-X220':
+elif re.search('ThinkPad-X220', myhost):
 	myhost = ' (ThinkPad-X220)'
 elif myhost[:5] == 'tools':
 	myhost = ' ([[Toolforge:|Toolforge]])'
