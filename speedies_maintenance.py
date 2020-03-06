@@ -5,6 +5,15 @@ Speedies_maintenance.py
 Category:Candidates for speedy deletion
 For relevant subcategories of speedy deletion, check the upload year and
 add to tracking category for 3+ or 10+ years old files.
+
+pywikibot pwb.py speedies_maintenace.py -dir:faebot
+
+2020 March
+	Created after discussion on village pump.
+
+Project page: https://commons.wikimedia.org/wiki/User:Faebot/old_speedies
+Credit: Fæ
+License: CC-BY-SA-4.0
 """
 import pywikibot, re
 from sys import argv
