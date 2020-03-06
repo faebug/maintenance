@@ -38,7 +38,8 @@ print Fore.YELLOW + "Categories", Fore.GREEN
 print "\n".join(catArr)
 
 existing = []
-for cat in ["Speedy deletions for files over 10 years old", "Speedy deletions for files over 3 years old", "Files uploaded over 10 years ago in a speedy deletion subcategory", "Files uploaded over 3 years ago in a speedy deletion subcategory"]:
+for cat in ["Files uploaded over 10 years ago in a speedy deletion subcategory",
+			"Files uploaded over 3 years ago in a speedy deletion subcategory"]:
 	existing.extend( pywikibot.Category(site, "Category:" + cat ).articles( namespaces = 6 ) )
 
 rset = set()
